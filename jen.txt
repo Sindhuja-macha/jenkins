@@ -1,40 +1,37 @@
-Pipeline script:
 pipeline {
     agent any
 
-    tools {
-        maven 'maven'
-        jdk 'java'
-    }
-
     stages {
+
         stage('Checkout') {
             steps {
-                git branch: 'master',
-                    url: 'git@github.com:codefeeding99/Testing-and-Builing-using-pipe-line.git',
-                    credentialsId: 'pipeline key'
+                checkout scm
             }
         }
 
-        stage('Build & Test') {
+        stage('Verify Tools') {
             steps {
-                bat 'mvn clean install'
+                sh 'java --version'
+                sh 'mvn --version'
             }
         }
 
-        stage('Deploy (Optional)') {
+        stage('Build') {
             steps {
-                echo " Deployment stage (add steps if needed)"
+                sh 'mvn clean package'
             }
         }
-    }
 
-    post {
-        success {
-            echo "✅ Pipeline completed successfully!"
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
         }
-        failure {
-            echo "❌ Build failed. Check logs above."
+
+        stage('Complete') {
+            steps {
+                echo 'Continuous Integration completed successfully!'
+            }
         }
     }
 }
